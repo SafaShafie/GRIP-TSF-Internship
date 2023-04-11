@@ -1,0 +1,93 @@
+---
+title: "GRIP-Data Science & Business Analytics Tasks"
+author: "Done By: Safa AL-Shafie"
+date: "2023-04-04"
+output: html_document
+---
+
+## Task #1/Prediction using Supervised ML
+
+In this task we will predict:
+
+* 1-The Score percentage of students based on the study hours.
+* 2-The Student's score for 9.25 hrs of studying.
+
+*Dataset:*<https://drive.google.com/file/d/1koGHPElsHuXo9HPL4BQkZWRMJkOEHiv4/view>
+
+## Setting up the Environment
+```{r install & load packages, warning=FALSE}
+#install.packages("tidyverse")
+library(tidyverse)
+library(ggplot2)
+library(readr)
+library(dplyr)
+#install.packages("ggpubr")
+library(ggpubr)
+```
+
+## preparing & exploring data
+```{r exploring data}
+df <- read_csv("D:/data analysis workshop/spark foundation/#1/dataset/Book1.csv")
+```
+```{r}
+colnames(df)
+```
+
+```{r data}
+head(df)
+```
+
+```{r plotting data}
+plot(df)
+```
+
+## Exploring Scores-Hours variables correlation
+```{r Scores-Hours Correlation}
+df%>%
+  summarise(cor(scores,hours))
+```
+
+## creating the model
+```{r crating & investigating the regression model}
+model<- lm(scores~hours, data = df)
+summary(model)
+```
+
+## models attributes
+```{r attributes}
+attributes(model)
+model$coefficients
+model$residuals
+model$model
+```
+
+## Visualize the regression model
+```{r model graph, warning=FALSE}
+ggplot(df, aes(x=hours,y=scores))+
+  geom_point()+
+  geom_smooth(mapping = aes(x=hours,y=scores),method='lm', se=0, color= "red",lwd=2)+
+  labs(title = 'Scores Percentage vs. Study Hours')+
+  theme_classic()+
+  stat_regline_equation(label.x=1,label.y=80,aes(label= ..eq.label..), color="darkgreen",lwd=2)+
+  annotate('text',x=1.85,y=75,label="p-value: < 2.2e-16", color="darkgreen")+
+  stat_regline_equation(label.x=1,label.y=70,aes(label= ..rr.label..), color="darkgreen")
+```
+
+
+## Finding the student score when the study hour is 9.25
+```{r 9.25 hours of studying}
+score_for_9.25_studing_hours<-predict(model, data.frame(hours=9.25))
+score_for_9.25_studing_hours
+```
+
+## Creating new data frame with predicted values
+```{r new dataset}
+df1<- df %>%
+  mutate(predicted_score=predict(model))%>%
+  add_row(hours=9.25, predicted_score = score_for_9.25_studing_hours)
+```
+
+```{r new Dataset}
+head(df1,26)
+```
+
